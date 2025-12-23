@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Randori Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg: #0f0f18;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-solid: #16161f;
+            --surface-hover: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.12);
+
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --accent: #fbbf24;
+            --accent-glow: rgba(251, 191, 36, 0.3);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.3);
+            --danger: #ef4444;
+
+            --te-color: #3b82f6;
+            --te-glow: rgba(59, 130, 246, 0.3);
+            --koshi-color: #a855f7;
+            --koshi-glow: rgba(168, 85, 247, 0.3);
+            --ashi-color: #10b981;
+            --ashi-glow: rgba(16, 185, 129, 0.3);
+            --sutemi-color: #f59e0b;
+            --sutemi-glow: rgba(245, 158, 11, 0.3);
+
+            --text: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-dim: #64748b;
+
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+            --sidebar-width: 380px;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        .bg-effects {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 50%, rgba(168, 85, 247, 0.1), transparent),
+                radial-gradient(ellipse 50% 30% at 0% 80%, rgba(251, 191, 36, 0.08), transparent);
+        }
+
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+        }
+
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--koshi-color);
+            bottom: 10%;
+            left: -50px;
+            animation-delay: -7s;
+        }
+
+        .bg-orb-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--accent);
+            top: 40%;
+            right: 10%;
+            animation-delay: -14s;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* Layout */
+        .app-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 1024px) {
+            .app-container {
+                flex-direction: row;
+            }
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            padding: calc(var(--safe-top) + 16px) 20px 16px;
+            background: linear-gradient(to bottom, var(--bg-deep) 0%, var(--bg-deep) 50%, transparent 100%);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (min-width: 1024px) {
+            .header {
+                padding: 24px 32px 20px;
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--koshi-color) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow:
+                0 4px 20px var(--primary-glow),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            position: relative;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 16px;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: xor;
+            -webkit-mask-composite: xor;
+            pointer-events: none;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            width: 48px;
+            height: 48px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .header-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-light);
+            color: var(--text);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (min-width: 1024px) {
+            .header-btn.stats-toggle {
+                display: none;
+            }
+        }
+
+        /* Main content area */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 1024px) {
+            .main-wrapper {
+                margin-right: var(--sidebar-width);
+                max-width: calc(100vw - var(--sidebar-width));
+            }
+        }
+
+        .main {
+            flex: 1;
+            padding: 0 16px calc(var(--safe-bottom) + 24px);
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (min-width: 1024px) {
+            .main {
+                padding: 0 40px 40px;
+            }
+        }
+
+        /* Session bar */
+        .session-bar {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .session-bar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .session-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .session-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+            pointer-events: none;
+        }
+
+        .session-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--primary-glow);
+        }
+
+        .session-btn:active {
+            transform: scale(0.98);
+        }
+
+        .session-btn.active {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .session-info {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .session-timer {
+            font-size: 2rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-dim);
+            letter-spacing: -0.02em;
+        }
+
+        .session-timer.active {
+            color: var(--success);
+            text-shadow: 0 0 30px var(--success-glow);
+        }
+
+        .session-count {
+            text-align: right;
+        }
+
+        .session-count-num {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .session-count-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 4px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--surface);
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-secondary);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+            color: white;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .tab:active {
+            transform: scale(0.98);
+        }
+
+        /* Throw grid */
+        .throw-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 640px) {
+            .throw-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .throw-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .throw-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        .throw-btn {
+            aspect-ratio: 1;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .throw-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .throw-btn.te::before { background: linear-gradient(135deg, var(--te-glow), transparent 70%); }
+        .throw-btn.koshi::before { background: linear-gradient(135deg, var(--koshi-glow), transparent 70%); }
+        .throw-btn.ashi::before { background: linear-gradient(135deg, var(--ashi-glow), transparent 70%); }
+        .throw-btn.sutemi::before { background: linear-gradient(135deg, var(--sutemi-glow), transparent 70%); }
+
+        .throw-btn:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-light);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .throw-btn:hover::before {
+            opacity: 1;
+        }
+
+        .throw-btn.te:hover { box-shadow: 0 8px 30px var(--te-glow); }
+        .throw-btn.koshi:hover { box-shadow: 0 8px 30px var(--koshi-glow); }
+        .throw-btn.ashi:hover { box-shadow: 0 8px 30px var(--ashi-glow); }
+        .throw-btn.sutemi:hover { box-shadow: 0 8px 30px var(--sutemi-glow); }
+
+        .throw-btn:active {
+            transform: scale(0.95);
+        }
+
+        .throw-btn.logged {
+            animation: logPulse 0.5s ease-out;
+        }
+
+        @keyframes logPulse {
+            0% {
+                background: var(--success);
+                box-shadow: 0 0 40px var(--success-glow);
+            }
+            100% {
+                background: var(--surface);
+                box-shadow: none;
+            }
+        }
+
+        .throw-category-dot {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .throw-category-dot.te { color: var(--te-color); background: var(--te-color); }
+        .throw-category-dot.koshi { color: var(--koshi-color); background: var(--koshi-color); }
+        .throw-category-dot.ashi { color: var(--ashi-color); background: var(--ashi-color); }
+        .throw-category-dot.sutemi { color: var(--sutemi-color); background: var(--sutemi-color); }
+
+        .throw-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+            line-height: 1.2;
+            padding: 0 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .throw-count {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Combo grid */
+        .combo-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .combo-btn {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .combo-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .combo-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-light);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .combo-btn:hover::before {
+            opacity: 1;
+        }
+
+        .combo-btn:active {
+            transform: scale(0.99);
+        }
+
+        .combo-btn.logged {
+            animation: logPulse 0.5s ease-out;
+        }
+
+        .combo-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .combo-name {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .combo-sequence {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .combo-throw {
+            background: var(--surface-solid);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .combo-arrow {
+            color: var(--accent);
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .combo-count {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Sidebar (stats panel) */
+        .sidebar {
+            display: none;
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar {
+                display: block;
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: var(--sidebar-width);
+                background: var(--surface-solid);
+                border-left: 1px solid var(--border);
+                overflow-y: auto;
+                z-index: 50;
+            }
+
+            .sidebar-content {
+                padding: 32px 24px;
+            }
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .sidebar-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Stats Modal (mobile) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @media (min-width: 1024px) {
+            .modal-overlay {
+                display: none !important;
+            }
+        }
+
+        .modal {
+            background: var(--surface-solid);
+            width: 100%;
+            max-height: 90vh;
+            border-radius: 28px 28px 0 0;
+            padding: 24px 20px calc(var(--safe-bottom) + 24px);
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+            border: 1px solid var(--border);
+            border-bottom: none;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+            margin: 0 auto 24px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 50%;
+            color: var(--text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-light);
+        }
+
+        /* Stats sections */
+        .stat-section {
+            margin-bottom: 28px;
+        }
+
+        .stat-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        .stat-card.wide {
+            grid-column: span 2;
+        }
+
+        .stat-card.highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .stat-value.accent {
+            background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 6px;
+        }
+
+        /* Weekly chart */
+        .weekly-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 140px;
+            padding: 16px 0;
+            gap: 8px;
+        }
+
+        .chart-bar-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            height: 100%;
+        }
+
+        .chart-bar-wrapper {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .chart-bar {
+            width: 100%;
+            max-width: 40px;
+            background: linear-gradient(to top, var(--primary) 0%, rgba(99, 102, 241, 0.3) 100%);
+            border-radius: 8px 8px 4px 4px;
+            min-height: 4px;
+            transition: all 0.5s ease-out;
+            position: relative;
+        }
+
+        .chart-bar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+            border-radius: inherit;
+        }
+
+        .chart-bar.today {
+            background: linear-gradient(to top, var(--accent) 0%, rgba(251, 191, 36, 0.3) 100%);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .chart-day {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .chart-day.today {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* Top throws list */
+        .top-throws {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .top-throw-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .top-throw-rank {
+            width: 32px;
+            height: 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .top-throw-rank.gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border: none;
+            color: #1a1a1a;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .top-throw-rank.silver {
+            background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+            border: none;
+            color: #1a1a1a;
+        }
+
+        .top-throw-rank.bronze {
+            background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+            border: none;
+            color: white;
+        }
+
+        .top-throw-info {
+            flex: 1;
+        }
+
+        .top-throw-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .top-throw-count {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .top-throw-bar {
+            height: 6px;
+            background: var(--surface);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .top-throw-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--koshi-color) 100%);
+            border-radius: 3px;
+            transition: width 0.5s ease-out;
+        }
+
+        /* Share card */
+        .share-card {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%);
+            border-radius: 24px;
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .share-card::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 70% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 30%);
+            pointer-events: none;
+            animation: shimmer 10s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10%, 10%); }
+        }
+
+        .share-card-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .share-card-value {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            position: relative;
+        }
+
+        .share-card-label {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .share-card-throws {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .share-throw-chip {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            color: white;
+        }
+
+        .share-throw-chip span {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .share-btn {
+            margin-top: 24px;
+            background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+            color: #1a1a1a;
+            border: none;
+            padding: 16px 36px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .share-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        .share-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Session history */
+        .session-history {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .session-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .session-item:hover {
+            border-color: var(--border-light);
+            background: var(--surface-hover);
+        }
+
+        .session-item-date {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .session-item-meta {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 3px;
+        }
+
+        .session-item-count {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: calc(var(--safe-bottom) + 100px);
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s ease-out;
+            z-index: 300;
+            box-shadow: 0 8px 30px var(--success-glow);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        /* Category legend */
+        .category-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 14px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .legend-dot.te { color: var(--te-color); background: var(--te-color); }
+        .legend-dot.koshi { color: var(--koshi-color); background: var(--koshi-color); }
+        .legend-dot.ashi { color: var(--ashi-color); background: var(--ashi-color); }
+        .legend-dot.sutemi { color: var(--sutemi-color); background: var(--sutemi-color); }
+
+        /* Quick stats row for desktop */
+        .quick-stats {
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .quick-stats {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+
+            .quick-stat {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 18px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .quick-stat::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                opacity: 0.5;
+            }
+
+            .quick-stat:nth-child(1)::before { background: linear-gradient(135deg, var(--te-glow), transparent 70%); }
+            .quick-stat:nth-child(2)::before { background: linear-gradient(135deg, var(--koshi-glow), transparent 70%); }
+            .quick-stat:nth-child(3)::before { background: linear-gradient(135deg, var(--ashi-glow), transparent 70%); }
+            .quick-stat:nth-child(4)::before { background: linear-gradient(135deg, var(--sutemi-glow), transparent 70%); }
+
+            .quick-stat-value {
+                font-size: 1.75rem;
+                font-weight: 800;
+                color: var(--text);
+                position: relative;
+            }
+
+            .quick-stat-label {
+                font-size: 0.7rem;
+                color: var(--text-dim);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-top: 4px;
+                position: relative;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .quick-stats {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background effects -->
+    <div class="bg-effects">
+        <div class="bg-gradient"></div>
+        <div class="bg-grid"></div>
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Main wrapper -->
+        <div class="main-wrapper">
+            <header class="header">
+                <div class="logo">
+                    <div class="logo-icon">柔</div>
+                    <div class="logo-text">
+                        <div class="logo-title">Randori</div>
+                        <div class="logo-subtitle">Training Tracker</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn stats-toggle" onclick="openStats()" aria-label="View stats">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <main class="main">
+                <div class="session-bar">
+                    <button class="session-btn" id="sessionBtn" onclick="toggleSession()">Start Session</button>
+                    <div class="session-info">
+                        <div class="session-timer" id="sessionTimer">00:00</div>
+                        <div class="session-count">
+                            <div class="session-count-num" id="sessionCount">0</div>
+                            <div class="session-count-label">throws</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-stats" id="quickStats">
+                    <div class="quick-stat">
+                        <div class="quick-stat-value" id="qsToday">0</div>
+                        <div class="quick-stat-label">Today</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-value" id="qsWeek">0</div>
+                        <div class="quick-stat-label">This Week</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-value" id="qsTotal">0</div>
+                        <div class="quick-stat-label">All Time</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-value" id="qsSessions">0</div>
+                        <div class="quick-stat-label">Sessions</div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('throws')">Throws</button>
+                    <button class="tab" onclick="switchTab('combos')">Combinations</button>
+                </div>
+
+                <div id="throwsTab" class="tab-content active">
+                    <div class="category-legend">
+                        <div class="legend-item"><div class="legend-dot te"></div>Te-waza</div>
+                        <div class="legend-item"><div class="legend-dot koshi"></div>Koshi-waza</div>
+                        <div class="legend-item"><div class="legend-dot ashi"></div>Ashi-waza</div>
+                        <div class="legend-item"><div class="legend-dot sutemi"></div>Sutemi-waza</div>
+                    </div>
+                    <div class="throw-grid" id="throwGrid"></div>
+                </div>
+
+                <div id="combosTab" class="tab-content">
+                    <div class="combo-grid" id="comboGrid"></div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Desktop sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">Your Stats</h2>
+                </div>
+                <div id="sidebarStats"></div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Mobile modal -->
+    <div class="modal-overlay" id="statsModal" onclick="closeStats(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h2 class="modal-title">Your Stats</h2>
+                <button class="modal-close" onclick="closeStats()">&times;</button>
+            </div>
+            <div id="modalStats"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Data
+        const THROWS = [
+            { id: 'seoi-nage', name: 'Seoi-nage', category: 'te' },
+            { id: 'ippon-seoi', name: 'Ippon-seoi', category: 'te' },
+            { id: 'tai-otoshi', name: 'Tai-otoshi', category: 'te' },
+            { id: 'kata-guruma', name: 'Kata-guruma', category: 'te' },
+            { id: 'o-goshi', name: 'O-goshi', category: 'koshi' },
+            { id: 'uki-goshi', name: 'Uki-goshi', category: 'koshi' },
+            { id: 'harai-goshi', name: 'Harai-goshi', category: 'koshi' },
+            { id: 'koshi-guruma', name: 'Koshi-guruma', category: 'koshi' },
+            { id: 'osoto-gari', name: 'Osoto-gari', category: 'ashi' },
+            { id: 'ouchi-gari', name: 'Ouchi-gari', category: 'ashi' },
+            { id: 'kouchi-gari', name: 'Kouchi-gari', category: 'ashi' },
+            { id: 'deashi-barai', name: 'Deashi-barai', category: 'ashi' },
+            { id: 'kosoto-gari', name: 'Kosoto-gari', category: 'ashi' },
+            { id: 'uchi-mata', name: 'Uchi-mata', category: 'ashi' },
+            { id: 'tomoe-nage', name: 'Tomoe-nage', category: 'sutemi' },
+            { id: 'sumi-gaeshi', name: 'Sumi-gaeshi', category: 'sutemi' },
+            { id: 'tani-otoshi', name: 'Tani-otoshi', category: 'sutemi' },
+            { id: 'soto-makikomi', name: 'Soto-makikomi', category: 'sutemi' }
+        ];
+
+        const COMBOS = [
+            { id: 'ouchi-seoi', sequence: ['Ouchi-gari', 'Seoi-nage'], name: 'Classic Setup' },
+            { id: 'kouchi-ouchi', sequence: ['Kouchi-gari', 'Ouchi-gari'], name: 'Ashi Combo' },
+            { id: 'osoto-ouchi', sequence: ['Osoto-gari', 'Ouchi-gari'], name: 'Major-Minor' },
+            { id: 'seoi-kouchi', sequence: ['Seoi-nage', 'Kouchi-gari'], name: 'Recovery' },
+            { id: 'uchi-ouchi', sequence: ['Uchi-mata', 'Ouchi-gari'], name: 'Switch' },
+            { id: 'deashi-tai', sequence: ['Deashi-barai', 'Tai-otoshi'], name: 'Timing' },
+            { id: 'harai-osoto', sequence: ['Harai-goshi', 'Osoto-gari'], name: 'Hip to Foot' },
+            { id: 'tomoe-juji', sequence: ['Tomoe-nage', 'Juji-gatame'], name: 'Transition' }
+        ];
+
+        // State
+        let state = {
+            throws: [],
+            combos: [],
+            sessions: [],
+            currentSession: null
+        };
+
+        let sessionInterval = null;
+        let sessionStartTime = null;
+
+        // Load from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('randori-tracker');
+            if (saved) {
+                state = JSON.parse(saved);
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('randori-tracker', JSON.stringify(state));
+        }
+
+        // Render throw grid
+        function renderThrows() {
+            const grid = document.getElementById('throwGrid');
+            grid.innerHTML = THROWS.map(t => {
+                const count = state.throws.filter(x => x.name === t.id).length;
+                return `
+                    <button class="throw-btn ${t.category}" onclick="logThrow('${t.id}', this)">
+                        <div class="throw-category-dot ${t.category}"></div>
+                        <div class="throw-name">${t.name}</div>
+                        <div class="throw-count">${count}</div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Render combo grid
+        function renderCombos() {
+            const grid = document.getElementById('comboGrid');
+            grid.innerHTML = COMBOS.map(c => {
+                const count = state.combos.filter(x => x.id === c.id).length;
+                return `
+                    <button class="combo-btn" onclick="logCombo('${c.id}', this)">
+                        <div class="combo-content">
+                            <div class="combo-name">${c.name}</div>
+                            <div class="combo-sequence">
+                                ${c.sequence.map((t, i) => `
+                                    <span class="combo-throw">${t}</span>
+                                    ${i < c.sequence.length - 1 ? '<span class="combo-arrow">→</span>' : ''}
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="combo-count">${count}</div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Log throw
+        function logThrow(id, btn) {
+            const entry = {
+                id: Date.now(),
+                name: id,
+                timestamp: new Date().toISOString(),
+                sessionId: state.currentSession?.id || null
+            };
+            state.throws.push(entry);
+            saveState();
+
+            btn.classList.add('logged');
+            setTimeout(() => btn.classList.remove('logged'), 500);
+
+            const countEl = btn.querySelector('.throw-count');
+            countEl.textContent = state.throws.filter(x => x.name === id).length;
+
+            updateSessionCount();
+            updateQuickStats();
+            updateSidebarStats();
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+
+        // Log combo
+        function logCombo(id, btn) {
+            const combo = COMBOS.find(c => c.id === id);
+            const entry = {
+                id: Date.now(),
+                comboId: id,
+                sequence: combo.sequence,
+                timestamp: new Date().toISOString(),
+                sessionId: state.currentSession?.id || null
+            };
+            state.combos.push(entry);
+            saveState();
+
+            btn.classList.add('logged');
+            setTimeout(() => btn.classList.remove('logged'), 500);
+
+            const countEl = btn.querySelector('.combo-count');
+            countEl.textContent = state.combos.filter(x => x.id === id).length;
+
+            updateSessionCount();
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+
+        // Session management
+        function toggleSession() {
+            if (state.currentSession) {
+                endSession();
+            } else {
+                startSession();
+            }
+        }
+
+        function startSession() {
+            state.currentSession = {
+                id: Date.now(),
+                startTime: new Date().toISOString(),
+                throwsBefore: state.throws.length,
+                combosBefore: state.combos.length
+            };
+            sessionStartTime = Date.now();
+
+            document.getElementById('sessionBtn').textContent = 'End Session';
+            document.getElementById('sessionBtn').classList.add('active');
+            document.getElementById('sessionTimer').classList.add('active');
+            document.getElementById('sessionCount').textContent = '0';
+
+            sessionInterval = setInterval(updateTimer, 1000);
+            saveState();
+        }
+
+        function endSession() {
+            clearInterval(sessionInterval);
+
+            const throwCount = state.throws.length - state.currentSession.throwsBefore;
+            const comboCount = state.combos.length - state.currentSession.combosBefore;
+
+            const session = {
+                id: state.currentSession.id,
+                startTime: state.currentSession.startTime,
+                endTime: new Date().toISOString(),
+                throwCount,
+                comboCount,
+                duration: Date.now() - sessionStartTime
+            };
+            state.sessions.push(session);
+            state.currentSession = null;
+            saveState();
+
+            document.getElementById('sessionBtn').textContent = 'Start Session';
+            document.getElementById('sessionBtn').classList.remove('active');
+            document.getElementById('sessionTimer').classList.remove('active');
+            document.getElementById('sessionTimer').textContent = '00:00';
+
+            updateQuickStats();
+            updateSidebarStats();
+            showToast(`Session complete: ${throwCount} throws, ${comboCount} combos`);
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+            const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const secs = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('sessionTimer').textContent = `${mins}:${secs}`;
+        }
+
+        function updateSessionCount() {
+            if (state.currentSession) {
+                const count = (state.throws.length - state.currentSession.throwsBefore) +
+                              (state.combos.length - state.currentSession.combosBefore);
+                document.getElementById('sessionCount').textContent = count;
+            }
+        }
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        // Quick stats
+        function updateQuickStats() {
+            const now = new Date();
+            const today = now.toDateString();
+            const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+
+            const todayThrows = state.throws.filter(t => new Date(t.timestamp).toDateString() === today).length;
+            const weekThrows = state.throws.filter(t => new Date(t.timestamp) >= weekAgo).length;
+
+            const qsToday = document.getElementById('qsToday');
+            const qsWeek = document.getElementById('qsWeek');
+            const qsTotal = document.getElementById('qsTotal');
+            const qsSessions = document.getElementById('qsSessions');
+
+            if (qsToday) qsToday.textContent = todayThrows;
+            if (qsWeek) qsWeek.textContent = weekThrows;
+            if (qsTotal) qsTotal.textContent = state.throws.length;
+            if (qsSessions) qsSessions.textContent = state.sessions.length;
+        }
+
+        // Stats content
+        function generateStatsHTML() {
+            const now = new Date();
+            const today = now.toDateString();
+            const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+            const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+            const todayThrows = state.throws.filter(t => new Date(t.timestamp).toDateString() === today).length;
+            const weekThrows = state.throws.filter(t => new Date(t.timestamp) >= weekAgo).length;
+            const monthThrows = state.throws.filter(t => new Date(t.timestamp) >= monthAgo).length;
+
+            // Weekly chart data
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const counts = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(now - i * 24 * 60 * 60 * 1000);
+                const dateStr = d.toDateString();
+                const count = state.throws.filter(t => new Date(t.timestamp).toDateString() === dateStr).length;
+                counts.push({ day: days[d.getDay()], count, isToday: i === 0 });
+            }
+            const maxCount = Math.max(...counts.map(c => c.count), 1);
+
+            // Top throws
+            const throwCounts = {};
+            state.throws.forEach(t => {
+                throwCounts[t.name] = (throwCounts[t.name] || 0) + 1;
+            });
+            const topThrows = Object.entries(throwCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            const topMax = topThrows[0]?.[1] || 1;
+            const ranks = ['gold', 'silver', 'bronze', '', ''];
+
+            // Share throws
+            const shareTop = Object.entries(throwCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+            const total = state.throws.length || 1;
+
+            // Session history
+            const recentSessions = state.sessions.slice(-5).reverse();
+
+            return `
+                <div class="stat-section">
+                    <div class="stat-section-title">This Week</div>
+                    <div class="stat-card wide">
+                        <div class="weekly-chart">
+                            ${counts.map(c => `
+                                <div class="chart-bar-container">
+                                    <div class="chart-bar-wrapper">
+                                        <div class="chart-bar ${c.isToday ? 'today' : ''}" style="height: ${(c.count / maxCount) * 100}%"></div>
+                                    </div>
+                                    <div class="chart-day ${c.isToday ? 'today' : ''}">${c.day}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-section">
+                    <div class="stat-section-title">Overview</div>
+                    <div class="stat-cards">
+                        <div class="stat-card highlight">
+                            <div class="stat-value accent">${todayThrows}</div>
+                            <div class="stat-label">Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${weekThrows}</div>
+                            <div class="stat-label">This Week</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${state.throws.length}</div>
+                            <div class="stat-label">All Time</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${state.sessions.length}</div>
+                            <div class="stat-label">Sessions</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-section">
+                    <div class="stat-section-title">Top Techniques</div>
+                    <div class="stat-card wide">
+                        ${topThrows.length === 0 ? `
+                            <div class="empty-state">
+                                <div class="empty-icon">柔</div>
+                                <div>No throws logged yet. Start training!</div>
+                            </div>
+                        ` : `
+                            <div class="top-throws">
+                                ${topThrows.map(([name, count], i) => {
+                                    const throwData = THROWS.find(t => t.id === name);
+                                    return `
+                                        <div class="top-throw-item">
+                                            <div class="top-throw-rank ${ranks[i]}">${i + 1}</div>
+                                            <div class="top-throw-info">
+                                                <div class="top-throw-name">${throwData?.name || name}</div>
+                                                <div class="top-throw-count">${count} throws</div>
+                                                <div class="top-throw-bar">
+                                                    <div class="top-throw-bar-fill" style="width: ${(count / topMax) * 100}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+
+                <div class="stat-section">
+                    <div class="stat-section-title">Share Your Progress</div>
+                    <div class="share-card">
+                        <div class="share-card-title">Randori Tracker</div>
+                        <div class="share-card-value">${monthThrows}</div>
+                        <div class="share-card-label">throws this month</div>
+                        <div class="share-card-throws">
+                            ${shareTop.map(([name, count]) => {
+                                const throwData = THROWS.find(t => t.id === name);
+                                const pct = Math.round((count / total) * 100);
+                                return `<div class="share-throw-chip">${throwData?.name || name} <span>${pct}%</span></div>`;
+                            }).join('')}
+                        </div>
+                        <button class="share-btn" onclick="shareStats()">Share Progress</button>
+                    </div>
+                </div>
+
+                <div class="stat-section">
+                    <div class="stat-section-title">Recent Sessions</div>
+                    ${recentSessions.length === 0 ? `
+                        <div class="stat-card wide">
+                            <div class="empty-state">
+                                <div>No sessions yet. Start one to track your randori!</div>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="session-history">
+                            ${recentSessions.map(s => {
+                                const date = new Date(s.startTime);
+                                const duration = Math.floor(s.duration / 60000);
+                                return `
+                                    <div class="session-item">
+                                        <div>
+                                            <div class="session-item-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                                            <div class="session-item-meta">${duration} min</div>
+                                        </div>
+                                        <div class="session-item-count">${s.throwCount}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        // Stats
+        function openStats() {
+            document.getElementById('modalStats').innerHTML = generateStatsHTML();
+            document.getElementById('statsModal').classList.add('active');
+        }
+
+        function closeStats(e) {
+            if (!e || e.target === document.getElementById('statsModal')) {
+                document.getElementById('statsModal').classList.remove('active');
+            }
+        }
+
+        function updateSidebarStats() {
+            const sidebarStats = document.getElementById('sidebarStats');
+            if (sidebarStats) {
+                sidebarStats.innerHTML = generateStatsHTML();
+            }
+        }
+
+        // Share
+        async function shareStats() {
+            const monthThrows = state.throws.filter(t => {
+                const d = new Date(t.timestamp);
+                const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+                return d >= monthAgo;
+            }).length;
+
+            const throwCounts = {};
+            state.throws.forEach(t => {
+                throwCounts[t.name] = (throwCounts[t.name] || 0) + 1;
+            });
+
+            const top = Object.entries(throwCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([name]) => THROWS.find(t => t.id === name)?.name || name);
+
+            const text = `Randori Tracker: ${monthThrows} throws this month! Top techniques: ${top.join(', ')}`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ text, title: 'My Judo Progress' });
+                } catch (e) {
+                    copyToClipboard(text);
+                }
+            } else {
+                copyToClipboard(text);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!');
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // Init
+        loadState();
+        renderThrows();
+        renderCombos();
+        updateQuickStats();
+        updateSidebarStats();
+
+        // Restore session if active
+        if (state.currentSession) {
+            sessionStartTime = new Date(state.currentSession.startTime).getTime();
+            document.getElementById('sessionBtn').textContent = 'End Session';
+            document.getElementById('sessionBtn').classList.add('active');
+            document.getElementById('sessionTimer').classList.add('active');
+            sessionInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+            updateSessionCount();
+        }
+    </script>
+</body>
+</html>
