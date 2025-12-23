@@ -1459,7 +1459,7 @@
         function renderCombos() {
             const grid = document.getElementById('comboGrid');
             grid.innerHTML = COMBOS.map(c => {
-                const count = state.combos.filter(x => x.id === c.id).length;
+                const count = state.combos.filter(x => x.comboId === c.id).length;
                 return `
                     <button class="combo-btn" onclick="logCombo('${c.id}', this)">
                         <div class="combo-content">
@@ -1517,7 +1517,7 @@
             setTimeout(() => btn.classList.remove('logged'), 500);
 
             const countEl = btn.querySelector('.combo-count');
-            countEl.textContent = state.combos.filter(x => x.id === id).length;
+            countEl.textContent = state.combos.filter(x => x.comboId === id).length;
 
             updateSessionCount();
             if (navigator.vibrate) navigator.vibrate(10);
