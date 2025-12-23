@@ -28,6 +28,9 @@
             api_host: 'https://us.i.posthog.com',
             defaults: '2025-11-30',
             person_profiles: 'identified_only',
+            loaded: function(posthog) {
+                console.log('PostHog loaded successfully, distinct_id:', posthog.get_distinct_id());
+            }
         })
     </script>
 
