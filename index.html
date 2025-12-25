@@ -27,10 +27,7 @@
         posthog.init('phc_JHVEED8H4Ks0G7Vz7igynkyVEG9s8xVdDLahFBlSnoP', {
             api_host: 'https://us.i.posthog.com',
             defaults: '2025-11-30',
-            person_profiles: 'identified_only',
-            loaded: function(posthog) {
-                console.log('PostHog loaded successfully, distinct_id:', posthog.get_distinct_id());
-            }
+            person_profiles: 'identified_only'
         })
     </script>
 
@@ -1455,11 +1452,37 @@
         let sessionInterval = null;
         let sessionStartTime = null;
 
+        // Generate crypto-secure unique ID
+        function generateId() {
+            if (crypto.randomUUID) {
+                return crypto.randomUUID();
+            }
+            // Fallback for older browsers
+            return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+        }
+
         // Load from localStorage
         function loadState() {
             const saved = localStorage.getItem('randori-tracker');
             if (saved) {
-                state = JSON.parse(saved);
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Validate structure to prevent corrupted/malicious data
+                    if (parsed && typeof parsed === 'object' &&
+                        Array.isArray(parsed.throws) &&
+                        Array.isArray(parsed.combos) &&
+                        Array.isArray(parsed.sessions)) {
+                        state = {
+                            throws: parsed.throws,
+                            combos: parsed.combos,
+                            sessions: parsed.sessions,
+                            currentSession: parsed.currentSession || null
+                        };
+                    }
+                } catch (e) {
+                    console.error('Failed to load state, using defaults:', e);
+                    // Keep default state
+                }
             }
         }
 
@@ -1507,7 +1530,7 @@
         // Log throw
         function logThrow(id, btn) {
             const entry = {
-                id: Date.now(),
+                id: generateId(),
                 name: id,
                 timestamp: new Date().toISOString(),
                 sessionId: state.currentSession?.id || null
@@ -1541,7 +1564,7 @@
         function logCombo(id, btn) {
             const combo = COMBOS.find(c => c.id === id);
             const entry = {
-                id: Date.now(),
+                id: generateId(),
                 comboId: id,
                 sequence: combo.sequence,
                 timestamp: new Date().toISOString(),
@@ -1580,7 +1603,7 @@
 
         function startSession() {
             state.currentSession = {
-                id: Date.now(),
+                id: generateId(),
                 startTime: new Date().toISOString(),
                 throwsBefore: state.throws.length,
                 combosBefore: state.combos.length
