@@ -6,6 +6,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a0a0f">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="og-image.png">
     <title>Randori Tracker</title>
 
     <!-- Open Graph / Social Sharing -->
@@ -67,6 +69,8 @@
             --ashi-glow: rgba(16, 185, 129, 0.3);
             --sutemi-color: #f59e0b;
             --sutemi-glow: rgba(245, 158, 11, 0.3);
+            --newaza-color: #ec4899;
+            --newaza-glow: rgba(236, 72, 153, 0.3);
 
             --text: #f8fafc;
             --text-secondary: #94a3b8;
@@ -515,6 +519,7 @@
         .throw-btn.koshi::before { background: linear-gradient(135deg, var(--koshi-glow), transparent 70%); }
         .throw-btn.ashi::before { background: linear-gradient(135deg, var(--ashi-glow), transparent 70%); }
         .throw-btn.sutemi::before { background: linear-gradient(135deg, var(--sutemi-glow), transparent 70%); }
+        .throw-btn.newaza::before { background: linear-gradient(135deg, var(--newaza-glow), transparent 70%); }
 
         .throw-btn:hover {
             transform: translateY(-4px);
@@ -530,6 +535,7 @@
         .throw-btn.koshi:hover { box-shadow: 0 8px 30px var(--koshi-glow); }
         .throw-btn.ashi:hover { box-shadow: 0 8px 30px var(--ashi-glow); }
         .throw-btn.sutemi:hover { box-shadow: 0 8px 30px var(--sutemi-glow); }
+        .throw-btn.newaza:hover { box-shadow: 0 8px 30px var(--newaza-glow); }
 
         .throw-btn:active {
             transform: scale(0.95);
@@ -564,6 +570,7 @@
         .throw-category-dot.koshi { color: var(--koshi-color); background: var(--koshi-color); }
         .throw-category-dot.ashi { color: var(--ashi-color); background: var(--ashi-color); }
         .throw-category-dot.sutemi { color: var(--sutemi-color); background: var(--sutemi-color); }
+        .throw-category-dot.newaza { color: var(--newaza-color); background: var(--newaza-color); }
 
         .throw-name {
             font-size: 0.85rem;
@@ -877,6 +884,85 @@
             font-size: 0.8rem;
             color: var(--text-dim);
             margin-top: 6px;
+        }
+
+        .stat-trend {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 4px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .stat-trend.up {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .stat-trend.down {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .stat-trend.neutral {
+            color: var(--text-dim);
+            background: var(--surface);
+        }
+
+        .stat-value.pr {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Category breakdown */
+        .category-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .category-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-bar-label {
+            width: 90px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .category-bar-track {
+            flex: 1;
+            height: 8px;
+            background: var(--surface);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .category-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .category-bar-fill.te { background: var(--te-color); }
+        .category-bar-fill.koshi { background: var(--koshi-color); }
+        .category-bar-fill.ashi { background: var(--ashi-color); }
+        .category-bar-fill.sutemi { background: var(--sutemi-color); }
+        .category-bar-fill.newaza { background: var(--newaza-color); }
+
+        .category-bar-value {
+            width: 40px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
         }
 
         /* Weekly chart */
@@ -1196,6 +1282,107 @@
             opacity: 1;
         }
 
+        /* Undo button */
+        .undo-btn {
+            position: fixed;
+            bottom: calc(var(--safe-bottom) + 100px);
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, var(--surface-solid) 0%, #1e1e2e 100%);
+            border: 1px solid var(--border-light);
+            color: var(--text);
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s ease-out;
+            z-index: 299;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        .undo-btn.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .undo-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary);
+        }
+
+        .undo-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Settings */
+        .settings-content {
+            padding: 0 4px;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .settings-item.danger {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .settings-info {
+            flex: 1;
+        }
+
+        .settings-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .settings-desc {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .settings-btn {
+            padding: 10px 20px;
+            border: 1px solid var(--border-light);
+            background: var(--surface-solid);
+            color: var(--text);
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary);
+        }
+
+        .settings-btn.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .settings-btn.danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
         /* Empty state */
         .empty-state {
             text-align: center;
@@ -1240,6 +1427,7 @@
         .legend-dot.koshi { color: var(--koshi-color); background: var(--koshi-color); }
         .legend-dot.ashi { color: var(--ashi-color); background: var(--ashi-color); }
         .legend-dot.sutemi { color: var(--sutemi-color); background: var(--sutemi-color); }
+        .legend-dot.newaza { color: var(--newaza-color); background: var(--newaza-color); }
 
         /* Quick stats row for desktop */
         .quick-stats {
@@ -1322,6 +1510,11 @@
                     </div>
                 </div>
                 <div class="header-actions">
+                    <button class="header-btn" onclick="openSettings()" aria-label="Settings">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10"/><path d="M21 12h-6m-6 0H3"/><path d="m19.07 4.93-4.24 4.24m-5.66 5.66-4.24 4.24"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/>
+                        </svg>
+                    </button>
                     <button class="header-btn stats-toggle" onclick="openStats()" aria-label="View stats">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
@@ -1363,7 +1556,8 @@
 
                 <div class="tabs">
                     <button class="tab active" onclick="switchTab('throws')">Throws</button>
-                    <button class="tab" onclick="switchTab('combos')">Combinations</button>
+                    <button class="tab" onclick="switchTab('newaza')">Newaza</button>
+                    <button class="tab" onclick="switchTab('combos')">Combos</button>
                 </div>
 
                 <div id="throwsTab" class="tab-content active">
@@ -1374,6 +1568,15 @@
                         <div class="legend-item"><div class="legend-dot sutemi"></div>Sutemi-waza</div>
                     </div>
                     <div class="throw-grid" id="throwGrid"></div>
+                </div>
+
+                <div id="newazaTab" class="tab-content">
+                    <div class="category-legend">
+                        <div class="legend-item"><div class="legend-dot newaza"></div>Pins</div>
+                        <div class="legend-item"><div class="legend-dot newaza"></div>Chokes</div>
+                        <div class="legend-item"><div class="legend-dot newaza"></div>Armlocks</div>
+                    </div>
+                    <div class="throw-grid" id="newazaGrid"></div>
                 </div>
 
                 <div id="combosTab" class="tab-content">
@@ -1405,32 +1608,100 @@
         </div>
     </div>
 
+    <!-- Settings modal -->
+    <div class="modal-overlay" id="settingsModal" onclick="closeSettings(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h2 class="modal-title">Settings</h2>
+                <button class="modal-close" onclick="closeSettings()">&times;</button>
+            </div>
+            <div class="settings-content">
+                <div class="stat-section">
+                    <div class="stat-section-title">Data Management</div>
+                    <div class="settings-item">
+                        <div class="settings-info">
+                            <div class="settings-label">Export Data</div>
+                            <div class="settings-desc">Download your training data as JSON</div>
+                        </div>
+                        <button class="settings-btn" onclick="exportData()">Export</button>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-info">
+                            <div class="settings-label">Import Data</div>
+                            <div class="settings-desc">Restore from a backup file</div>
+                        </div>
+                        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+                        <button class="settings-btn" onclick="document.getElementById('importFile').click()">Import</button>
+                    </div>
+                </div>
+                <div class="stat-section">
+                    <div class="stat-section-title">Danger Zone</div>
+                    <div class="settings-item danger">
+                        <div class="settings-info">
+                            <div class="settings-label">Reset All Data</div>
+                            <div class="settings-desc">Permanently delete all throws, combos, and sessions</div>
+                        </div>
+                        <button class="settings-btn danger" onclick="confirmReset()">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
+    <button class="undo-btn" id="undoBtn" onclick="undoLastAction()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+        </svg>
+        <span id="undoText">Undo</span>
+    </button>
 
     <script>
         // Data
         const THROWS = [
+            // Te-waza (hand techniques)
             { id: 'seoi-nage', name: 'Seoi-nage', category: 'te' },
             { id: 'ippon-seoi', name: 'Ippon-seoi', category: 'te' },
+            { id: 'morote-seoi', name: 'Morote-seoi', category: 'te' },
             { id: 'tai-otoshi', name: 'Tai-otoshi', category: 'te' },
             { id: 'kata-guruma', name: 'Kata-guruma', category: 'te' },
+            { id: 'sode-tsuri', name: 'Sode-tsuri', category: 'te' },
+            { id: 'sukui-nage', name: 'Sukui-nage', category: 'te' },
+            { id: 'kibisu-gaeshi', name: 'Kibisu-gaeshi', category: 'te' },
+            // Koshi-waza (hip techniques)
             { id: 'o-goshi', name: 'O-goshi', category: 'koshi' },
             { id: 'uki-goshi', name: 'Uki-goshi', category: 'koshi' },
             { id: 'harai-goshi', name: 'Harai-goshi', category: 'koshi' },
             { id: 'koshi-guruma', name: 'Koshi-guruma', category: 'koshi' },
+            { id: 'tsuri-goshi', name: 'Tsuri-goshi', category: 'koshi' },
+            { id: 'tsurikomi-goshi', name: 'Tsurikomi-goshi', category: 'koshi' },
+            { id: 'ushiro-goshi', name: 'Ushiro-goshi', category: 'koshi' },
+            // Ashi-waza (foot/leg techniques)
             { id: 'osoto-gari', name: 'Osoto-gari', category: 'ashi' },
             { id: 'ouchi-gari', name: 'Ouchi-gari', category: 'ashi' },
             { id: 'kouchi-gari', name: 'Kouchi-gari', category: 'ashi' },
             { id: 'deashi-barai', name: 'Deashi-barai', category: 'ashi' },
             { id: 'kosoto-gari', name: 'Kosoto-gari', category: 'ashi' },
             { id: 'uchi-mata', name: 'Uchi-mata', category: 'ashi' },
+            { id: 'okuri-ashi', name: 'Okuri-ashi', category: 'ashi' },
+            { id: 'sasae', name: 'Sasae', category: 'ashi' },
+            { id: 'hiza-guruma', name: 'Hiza-guruma', category: 'ashi' },
+            { id: 'harai-tsuri', name: 'Harai-tsuri', category: 'ashi' },
+            { id: 'ashi-guruma', name: 'Ashi-guruma', category: 'ashi' },
+            // Sutemi-waza (sacrifice techniques)
             { id: 'tomoe-nage', name: 'Tomoe-nage', category: 'sutemi' },
             { id: 'sumi-gaeshi', name: 'Sumi-gaeshi', category: 'sutemi' },
             { id: 'tani-otoshi', name: 'Tani-otoshi', category: 'sutemi' },
-            { id: 'soto-makikomi', name: 'Soto-makikomi', category: 'sutemi' }
+            { id: 'soto-makikomi', name: 'Soto-makikomi', category: 'sutemi' },
+            { id: 'ura-nage', name: 'Ura-nage', category: 'sutemi' },
+            { id: 'yoko-guruma', name: 'Yoko-guruma', category: 'sutemi' },
+            { id: 'hikikomi', name: 'Hikikomi', category: 'sutemi' },
+            { id: 'uki-waza', name: 'Uki-waza', category: 'sutemi' }
         ];
 
         const COMBOS = [
+            // 2-throw combos
             { id: 'ouchi-seoi', sequence: ['Ouchi-gari', 'Seoi-nage'], name: 'Classic Setup' },
             { id: 'kouchi-ouchi', sequence: ['Kouchi-gari', 'Ouchi-gari'], name: 'Ashi Combo' },
             { id: 'osoto-ouchi', sequence: ['Osoto-gari', 'Ouchi-gari'], name: 'Major-Minor' },
@@ -1438,19 +1709,51 @@
             { id: 'uchi-ouchi', sequence: ['Uchi-mata', 'Ouchi-gari'], name: 'Switch' },
             { id: 'deashi-tai', sequence: ['Deashi-barai', 'Tai-otoshi'], name: 'Timing' },
             { id: 'harai-osoto', sequence: ['Harai-goshi', 'Osoto-gari'], name: 'Hip to Foot' },
-            { id: 'tomoe-juji', sequence: ['Tomoe-nage', 'Juji-gatame'], name: 'Transition' }
+            { id: 'sasae-seoi', sequence: ['Sasae', 'Seoi-nage'], name: 'Block & Throw' },
+            // 3-throw chains
+            { id: 'kouchi-ouchi-seoi', sequence: ['Kouchi-gari', 'Ouchi-gari', 'Seoi-nage'], name: 'Triple Threat' },
+            { id: 'osoto-kouchi-osoto', sequence: ['Osoto-gari', 'Kouchi-gari', 'Osoto-gari'], name: 'Circle Back' },
+            { id: 'ouchi-kouchi-uchi', sequence: ['Ouchi-gari', 'Kouchi-gari', 'Uchi-mata'], name: 'Ashi to Hip' },
+            // Throw to newaza transitions
+            { id: 'tomoe-juji', sequence: ['Tomoe-nage', 'Juji-gatame'], name: 'Sacrifice Arm' },
+            { id: 'uchi-kesa', sequence: ['Uchi-mata', 'Kesa-gatame'], name: 'Hip to Pin' },
+            { id: 'seoi-tate', sequence: ['Seoi-nage', 'Tate-shiho'], name: 'Throw to Mount' },
+            { id: 'osoto-yoko', sequence: ['Osoto-gari', 'Yoko-shiho'], name: 'Reap to Side' },
+            { id: 'harai-juji', sequence: ['Harai-goshi', 'Juji-gatame'], name: 'Sweep to Arm' }
+        ];
+
+        const NEWAZA = [
+            // Osaekomi-waza (pins)
+            { id: 'kesa-gatame', name: 'Kesa-gatame', category: 'newaza', subcategory: 'pin' },
+            { id: 'yoko-shiho', name: 'Yoko-shiho', category: 'newaza', subcategory: 'pin' },
+            { id: 'kami-shiho', name: 'Kami-shiho', category: 'newaza', subcategory: 'pin' },
+            { id: 'tate-shiho', name: 'Tate-shiho', category: 'newaza', subcategory: 'pin' },
+            { id: 'kuzure-kesa', name: 'Kuzure-kesa', category: 'newaza', subcategory: 'pin' },
+            // Shime-waza (chokes)
+            { id: 'hadaka-jime', name: 'Hadaka-jime', category: 'newaza', subcategory: 'choke' },
+            { id: 'okuri-eri', name: 'Okuri-eri', category: 'newaza', subcategory: 'choke' },
+            { id: 'kata-ha-jime', name: 'Kata-ha-jime', category: 'newaza', subcategory: 'choke' },
+            { id: 'sankaku-jime', name: 'Sankaku-jime', category: 'newaza', subcategory: 'choke' },
+            // Kansetsu-waza (armlocks)
+            { id: 'juji-gatame', name: 'Juji-gatame', category: 'newaza', subcategory: 'armlock' },
+            { id: 'ude-garami', name: 'Ude-garami', category: 'newaza', subcategory: 'armlock' },
+            { id: 'ude-gatame', name: 'Ude-gatame', category: 'newaza', subcategory: 'armlock' },
+            { id: 'waki-gatame', name: 'Waki-gatame', category: 'newaza', subcategory: 'armlock' }
         ];
 
         // State
         let state = {
             throws: [],
             combos: [],
+            newaza: [],
             sessions: [],
             currentSession: null
         };
 
         let sessionInterval = null;
         let sessionStartTime = null;
+        let lastAction = null;
+        let undoTimeout = null;
 
         // Generate crypto-secure unique ID
         function generateId() {
@@ -1475,6 +1778,7 @@
                         state = {
                             throws: parsed.throws,
                             combos: parsed.combos,
+                            newaza: Array.isArray(parsed.newaza) ? parsed.newaza : [],
                             sessions: parsed.sessions,
                             currentSession: parsed.currentSession || null
                         };
@@ -1527,6 +1831,21 @@
             }).join('');
         }
 
+        // Render newaza grid
+        function renderNewaza() {
+            const grid = document.getElementById('newazaGrid');
+            grid.innerHTML = NEWAZA.map(t => {
+                const count = state.newaza.filter(x => x.name === t.id).length;
+                return `
+                    <button class="throw-btn ${t.category}" onclick="logNewaza('${t.id}', this)">
+                        <div class="throw-category-dot ${t.category}"></div>
+                        <div class="throw-name">${t.name}</div>
+                        <div class="throw-count">${count}</div>
+                    </button>
+                `;
+            }).join('');
+        }
+
         // Log throw
         function logThrow(id, btn) {
             const entry = {
@@ -1558,6 +1877,9 @@
                 total_count: state.throws.filter(x => x.name === id).length,
                 in_session: !!state.currentSession
             });
+
+            // Show undo option
+            showUndo('throw', id, throwData?.name || id);
         }
 
         // Log combo
@@ -1590,6 +1912,45 @@
                 total_count: state.combos.filter(x => x.comboId === id).length,
                 in_session: !!state.currentSession
             });
+
+            // Show undo option
+            showUndo('combo', id, combo.name);
+        }
+
+        // Log newaza
+        function logNewaza(id, btn) {
+            const entry = {
+                id: generateId(),
+                name: id,
+                timestamp: new Date().toISOString(),
+                sessionId: state.currentSession?.id || null
+            };
+            state.newaza.push(entry);
+            saveState();
+
+            btn.classList.add('logged');
+            setTimeout(() => btn.classList.remove('logged'), 500);
+
+            const countEl = btn.querySelector('.throw-count');
+            countEl.textContent = state.newaza.filter(x => x.name === id).length;
+
+            updateSessionCount();
+            updateQuickStats();
+            updateSidebarStats();
+            if (navigator.vibrate) navigator.vibrate(10);
+
+            // Track event
+            const technique = NEWAZA.find(t => t.id === id);
+            posthog.capture('newaza_logged', {
+                technique_name: technique?.name || id,
+                technique_id: id,
+                subcategory: technique?.subcategory,
+                total_count: state.newaza.filter(x => x.name === id).length,
+                in_session: !!state.currentSession
+            });
+
+            // Show undo option
+            showUndo('newaza', id, technique?.name || id);
         }
 
         // Session management
@@ -1606,7 +1967,8 @@
                 id: generateId(),
                 startTime: new Date().toISOString(),
                 throwsBefore: state.throws.length,
-                combosBefore: state.combos.length
+                combosBefore: state.combos.length,
+                newazaBefore: state.newaza.length
             };
             sessionStartTime = Date.now();
 
@@ -1630,6 +1992,7 @@
 
             const throwCount = state.throws.length - state.currentSession.throwsBefore;
             const comboCount = state.combos.length - state.currentSession.combosBefore;
+            const newazaCount = state.newaza.length - (state.currentSession.newazaBefore || 0);
 
             const session = {
                 id: state.currentSession.id,
@@ -1637,6 +2000,7 @@
                 endTime: new Date().toISOString(),
                 throwCount,
                 comboCount,
+                newazaCount,
                 duration: Date.now() - sessionStartTime
             };
             state.sessions.push(session);
@@ -1650,7 +2014,8 @@
 
             updateQuickStats();
             updateSidebarStats();
-            showToast(`Session complete: ${throwCount} throws, ${comboCount} combos`);
+            const total = throwCount + comboCount + newazaCount;
+            showToast(`Session complete: ${total} techniques logged`);
 
             // Track event
             posthog.capture('session_ended', {
@@ -1671,7 +2036,8 @@
         function updateSessionCount() {
             if (state.currentSession) {
                 const count = (state.throws.length - state.currentSession.throwsBefore) +
-                              (state.combos.length - state.currentSession.combosBefore);
+                              (state.combos.length - state.currentSession.combosBefore) +
+                              (state.newaza.length - (state.currentSession.newazaBefore || 0));
                 document.getElementById('sessionCount').textContent = count;
             }
         }
@@ -1709,11 +2075,57 @@
             const now = new Date();
             const today = now.toDateString();
             const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+            const twoWeeksAgo = new Date(now - 14 * 24 * 60 * 60 * 1000);
             const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
 
             const todayThrows = state.throws.filter(t => new Date(t.timestamp).toDateString() === today).length;
             const weekThrows = state.throws.filter(t => new Date(t.timestamp) >= weekAgo).length;
+            const lastWeekThrows = state.throws.filter(t => {
+                const d = new Date(t.timestamp);
+                return d >= twoWeeksAgo && d < weekAgo;
+            }).length;
             const monthThrows = state.throws.filter(t => new Date(t.timestamp) >= monthAgo).length;
+
+            // Trend calculation
+            const weekTrend = lastWeekThrows > 0 ? Math.round(((weekThrows - lastWeekThrows) / lastWeekThrows) * 100) : (weekThrows > 0 ? 100 : 0);
+            const trendIcon = weekTrend > 0 ? '↑' : weekTrend < 0 ? '↓' : '→';
+            const trendClass = weekTrend > 0 ? 'up' : weekTrend < 0 ? 'down' : 'neutral';
+
+            // Training streak
+            let streak = 0;
+            let checkDate = new Date(now);
+            while (true) {
+                const dateStr = checkDate.toDateString();
+                const hasTraining = state.throws.some(t => new Date(t.timestamp).toDateString() === dateStr);
+                if (hasTraining) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else if (streak === 0 && checkDate.toDateString() === now.toDateString()) {
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+
+            // Personal records
+            const sessionThrowCounts = state.sessions.map(s => s.throwCount + (s.comboCount || 0) + (s.newazaCount || 0));
+            const maxSessionThrows = Math.max(...sessionThrowCounts, 0);
+            const maxSessionDuration = Math.max(...state.sessions.map(s => s.duration || 0), 0);
+            const dailyTotals = {};
+            state.throws.forEach(t => {
+                const d = new Date(t.timestamp).toDateString();
+                dailyTotals[d] = (dailyTotals[d] || 0) + 1;
+            });
+            const maxDailyThrows = Math.max(...Object.values(dailyTotals), 0);
+
+            // Category breakdown
+            const categories = { te: 0, koshi: 0, ashi: 0, sutemi: 0, newaza: 0 };
+            state.throws.forEach(t => {
+                const throwData = THROWS.find(x => x.id === t.name);
+                if (throwData) categories[throwData.category]++;
+            });
+            state.newaza.forEach(() => categories.newaza++);
+            const totalTechniques = Object.values(categories).reduce((a, b) => a + b, 0) || 1;
 
             // Weekly chart data
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -1773,13 +2185,79 @@
                         <div class="stat-card">
                             <div class="stat-value">${weekThrows}</div>
                             <div class="stat-label">This Week</div>
+                            <div class="stat-trend ${trendClass}">${trendIcon} ${Math.abs(weekTrend)}%</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-value">${state.throws.length}</div>
+                            <div class="stat-value">${state.throws.length + state.newaza.length}</div>
                             <div class="stat-label">All Time</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-value">${state.sessions.length}</div>
+                            <div class="stat-value">${streak}</div>
+                            <div class="stat-label">Day Streak</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-section">
+                    <div class="stat-section-title">Category Breakdown</div>
+                    <div class="stat-card wide">
+                        <div class="category-bars">
+                            <div class="category-bar-item">
+                                <div class="category-bar-label">Te-waza</div>
+                                <div class="category-bar-track">
+                                    <div class="category-bar-fill te" style="width: ${(categories.te / totalTechniques) * 100}%"></div>
+                                </div>
+                                <div class="category-bar-value">${categories.te}</div>
+                            </div>
+                            <div class="category-bar-item">
+                                <div class="category-bar-label">Koshi-waza</div>
+                                <div class="category-bar-track">
+                                    <div class="category-bar-fill koshi" style="width: ${(categories.koshi / totalTechniques) * 100}%"></div>
+                                </div>
+                                <div class="category-bar-value">${categories.koshi}</div>
+                            </div>
+                            <div class="category-bar-item">
+                                <div class="category-bar-label">Ashi-waza</div>
+                                <div class="category-bar-track">
+                                    <div class="category-bar-fill ashi" style="width: ${(categories.ashi / totalTechniques) * 100}%"></div>
+                                </div>
+                                <div class="category-bar-value">${categories.ashi}</div>
+                            </div>
+                            <div class="category-bar-item">
+                                <div class="category-bar-label">Sutemi-waza</div>
+                                <div class="category-bar-track">
+                                    <div class="category-bar-fill sutemi" style="width: ${(categories.sutemi / totalTechniques) * 100}%"></div>
+                                </div>
+                                <div class="category-bar-value">${categories.sutemi}</div>
+                            </div>
+                            <div class="category-bar-item">
+                                <div class="category-bar-label">Newaza</div>
+                                <div class="category-bar-track">
+                                    <div class="category-bar-fill newaza" style="width: ${(categories.newaza / totalTechniques) * 100}%"></div>
+                                </div>
+                                <div class="category-bar-value">${categories.newaza}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-section">
+                    <div class="stat-section-title">Personal Records</div>
+                    <div class="stat-cards">
+                        <div class="stat-card">
+                            <div class="stat-value pr">${maxSessionThrows}</div>
+                            <div class="stat-label">Best Session</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value pr">${maxDailyThrows}</div>
+                            <div class="stat-label">Best Day</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value pr">${Math.floor(maxSessionDuration / 60000)}</div>
+                            <div class="stat-label">Longest (min)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value pr">${state.sessions.length}</div>
                             <div class="stat-label">Sessions</div>
                         </div>
                     </div>
@@ -1879,6 +2357,90 @@
             }
         }
 
+        // Settings
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeSettings(e) {
+            if (!e || e.target === document.getElementById('settingsModal')) {
+                document.getElementById('settingsModal').classList.remove('active');
+            }
+        }
+
+        function exportData() {
+            const data = {
+                version: 1,
+                exportDate: new Date().toISOString(),
+                throws: state.throws,
+                combos: state.combos,
+                newaza: state.newaza,
+                sessions: state.sessions
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `randori-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Data exported successfully!');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.throws && Array.isArray(data.throws)) {
+                        state.throws = data.throws;
+                        state.combos = Array.isArray(data.combos) ? data.combos : [];
+                        state.newaza = Array.isArray(data.newaza) ? data.newaza : [];
+                        state.sessions = Array.isArray(data.sessions) ? data.sessions : [];
+                        saveState();
+                        renderThrows();
+                        renderCombos();
+                        renderNewaza();
+                        updateQuickStats();
+                        updateSidebarStats();
+                        showToast('Data imported successfully!');
+                        closeSettings();
+                    } else {
+                        showToast('Invalid backup file');
+                    }
+                } catch (err) {
+                    showToast('Failed to import data');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function confirmReset() {
+            if (confirm('Are you sure you want to delete ALL your training data? This cannot be undone.')) {
+                if (confirm('This is your last chance! All throws, combos, and sessions will be permanently deleted.')) {
+                    state = {
+                        throws: [],
+                        combos: [],
+                        newaza: [],
+                        sessions: [],
+                        currentSession: null
+                    };
+                    saveState();
+                    renderThrows();
+                    renderCombos();
+                    renderNewaza();
+                    updateQuickStats();
+                    updateSidebarStats();
+                    closeSettings();
+                    showToast('All data has been reset');
+                }
+            }
+        }
+
         function updateSidebarStats() {
             const sidebarStats = document.getElementById('sidebarStats');
             if (sidebarStats) {
@@ -1937,10 +2499,67 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
+        function showUndo(type, name, displayName) {
+            lastAction = { type, name };
+            const undoBtn = document.getElementById('undoBtn');
+            const undoText = document.getElementById('undoText');
+            undoText.textContent = `Undo: ${displayName}`;
+            undoBtn.classList.add('show');
+
+            // Clear any existing timeout
+            if (undoTimeout) clearTimeout(undoTimeout);
+
+            // Hide after 5 seconds
+            undoTimeout = setTimeout(() => {
+                undoBtn.classList.remove('show');
+                lastAction = null;
+            }, 5000);
+        }
+
+        function undoLastAction() {
+            if (!lastAction) return;
+
+            const { type, name } = lastAction;
+
+            if (type === 'throw') {
+                const idx = state.throws.findLastIndex(t => t.name === name);
+                if (idx !== -1) {
+                    state.throws.splice(idx, 1);
+                    renderThrows();
+                }
+            } else if (type === 'combo') {
+                const idx = state.combos.findLastIndex(c => c.comboId === name);
+                if (idx !== -1) {
+                    state.combos.splice(idx, 1);
+                    renderCombos();
+                }
+            } else if (type === 'newaza') {
+                const idx = state.newaza.findLastIndex(n => n.name === name);
+                if (idx !== -1) {
+                    state.newaza.splice(idx, 1);
+                    renderNewaza();
+                }
+            }
+
+            saveState();
+            updateSessionCount();
+            updateQuickStats();
+            updateSidebarStats();
+
+            // Hide undo button
+            document.getElementById('undoBtn').classList.remove('show');
+            if (undoTimeout) clearTimeout(undoTimeout);
+            lastAction = null;
+
+            showToast('Action undone');
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+
         // Init
         loadState();
         renderThrows();
         renderCombos();
+        renderNewaza();
         updateQuickStats();
         updateSidebarStats();
 
@@ -1954,6 +2573,21 @@
             updateTimer();
             updateSessionCount();
         }
+
+        // Service worker registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW registration failed:', err));
+        }
+
+        // Install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Could show install button here if desired
+        });
     </script>
 </body>
 </html>

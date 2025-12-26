@@ -1,0 +1,20 @@
+{
+  "name": "Randori Tracker",
+  "short_name": "Randori",
+  "description": "Track your judo throws and combinations during training",
+  "start_url": "/judo-tracker/",
+  "scope": "/judo-tracker/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0a0a0f",
+  "background_color": "#0a0a0f",
+  "categories": ["sports", "fitness", "health"],
+  "icons": [
+    {
+      "src": "og-image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
