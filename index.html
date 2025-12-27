@@ -1396,6 +1396,125 @@
             opacity: 0.3;
         }
 
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            width: 18px;
+            height: 18px;
+            color: var(--text-dim);
+            pointer-events: none;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 8px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--border-light);
+            color: var(--text);
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .filter-chip.te.active { background: var(--te-color); border-color: var(--te-color); }
+        .filter-chip.koshi.active { background: var(--koshi-color); border-color: var(--koshi-color); }
+        .filter-chip.ashi.active { background: var(--ashi-color); border-color: var(--ashi-color); }
+        .filter-chip.sutemi.active { background: var(--sutemi-color); border-color: var(--sutemi-color); }
+
+        .filter-chip[data-category="favorites"] {
+            color: var(--accent);
+        }
+
+        .filter-chip[data-category="favorites"].active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .empty-filter {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Favorite star on throw buttons */
+        .throw-btn .fav-star {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 18px;
+            height: 18px;
+            color: var(--text-dim);
+            opacity: 0.4;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 2;
+        }
+
+        .throw-btn .fav-star:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .throw-btn .fav-star.active {
+            color: var(--accent);
+            opacity: 1;
+        }
+
         /* Category legend */
         .category-legend {
             display: flex;
@@ -1561,11 +1680,21 @@
                 </div>
 
                 <div id="throwsTab" class="tab-content active">
-                    <div class="category-legend">
-                        <div class="legend-item"><div class="legend-dot te"></div>Te-waza</div>
-                        <div class="legend-item"><div class="legend-dot koshi"></div>Koshi-waza</div>
-                        <div class="legend-item"><div class="legend-dot ashi"></div>Ashi-waza</div>
-                        <div class="legend-item"><div class="legend-dot sutemi"></div>Sutemi-waza</div>
+                    <div class="filter-bar">
+                        <div class="search-box">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <input type="text" id="throwSearch" placeholder="Search throws..." oninput="filterThrows()">
+                        </div>
+                        <div class="category-filters">
+                            <button class="filter-chip active" data-category="all" onclick="setThrowFilter('all', this)">All</button>
+                            <button class="filter-chip" data-category="favorites" onclick="setThrowFilter('favorites', this)">★</button>
+                            <button class="filter-chip te" data-category="te" onclick="setThrowFilter('te', this)">Te</button>
+                            <button class="filter-chip koshi" data-category="koshi" onclick="setThrowFilter('koshi', this)">Koshi</button>
+                            <button class="filter-chip ashi" data-category="ashi" onclick="setThrowFilter('ashi', this)">Ashi</button>
+                            <button class="filter-chip sutemi" data-category="sutemi" onclick="setThrowFilter('sutemi', this)">Sutemi</button>
+                        </div>
                     </div>
                     <div class="throw-grid" id="throwGrid"></div>
                 </div>
@@ -1747,13 +1876,15 @@
             combos: [],
             newaza: [],
             sessions: [],
-            currentSession: null
+            currentSession: null,
+            favorites: []
         };
 
         let sessionInterval = null;
         let sessionStartTime = null;
         let lastAction = null;
         let undoTimeout = null;
+        let currentThrowFilter = 'all';
 
         // Generate crypto-secure unique ID
         function generateId() {
@@ -1780,7 +1911,8 @@
                             combos: parsed.combos,
                             newaza: Array.isArray(parsed.newaza) ? parsed.newaza : [],
                             sessions: parsed.sessions,
-                            currentSession: parsed.currentSession || null
+                            currentSession: parsed.currentSession || null,
+                            favorites: Array.isArray(parsed.favorites) ? parsed.favorites : []
                         };
                     }
                 } catch (e) {
@@ -1797,16 +1929,70 @@
         // Render throw grid
         function renderThrows() {
             const grid = document.getElementById('throwGrid');
-            grid.innerHTML = THROWS.map(t => {
+            const searchTerm = document.getElementById('throwSearch')?.value?.toLowerCase() || '';
+
+            // Filter throws
+            let filtered = THROWS.filter(t => {
+                // Search filter
+                if (searchTerm && !t.name.toLowerCase().includes(searchTerm)) return false;
+                // Category filter
+                if (currentThrowFilter === 'favorites') return state.favorites.includes(t.id);
+                if (currentThrowFilter !== 'all' && t.category !== currentThrowFilter) return false;
+                return true;
+            });
+
+            // Sort favorites first when showing all
+            if (currentThrowFilter === 'all') {
+                filtered.sort((a, b) => {
+                    const aFav = state.favorites.includes(a.id);
+                    const bFav = state.favorites.includes(b.id);
+                    if (aFav && !bFav) return -1;
+                    if (!aFav && bFav) return 1;
+                    return 0;
+                });
+            }
+
+            grid.innerHTML = filtered.map(t => {
                 const count = state.throws.filter(x => x.name === t.id).length;
+                const isFav = state.favorites.includes(t.id);
                 return `
                     <button class="throw-btn ${t.category}" onclick="logThrow('${t.id}', this)">
+                        <svg class="fav-star ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${t.id}')" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
                         <div class="throw-category-dot ${t.category}"></div>
                         <div class="throw-name">${t.name}</div>
                         <div class="throw-count">${count}</div>
                     </button>
                 `;
             }).join('');
+
+            // Show empty state if no results
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="empty-filter">No throws match your filter</div>';
+            }
+        }
+
+        function filterThrows() {
+            renderThrows();
+        }
+
+        function setThrowFilter(category, btn) {
+            currentThrowFilter = category;
+            document.querySelectorAll('.category-filters .filter-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            renderThrows();
+        }
+
+        function toggleFavorite(id) {
+            const idx = state.favorites.indexOf(id);
+            if (idx === -1) {
+                state.favorites.push(id);
+            } else {
+                state.favorites.splice(idx, 1);
+            }
+            saveState();
+            renderThrows();
         }
 
         // Render combo grid
@@ -2427,7 +2613,8 @@
                         combos: [],
                         newaza: [],
                         sessions: [],
-                        currentSession: null
+                        currentSession: null,
+                        favorites: []
                     };
                     saveState();
                     renderThrows();
