@@ -71,6 +71,13 @@
             --sutemi-glow: rgba(245, 158, 11, 0.3);
             --newaza-color: #ec4899;
             --newaza-glow: rgba(236, 72, 153, 0.3);
+            /* Newaza subcategories */
+            --pin-color: #06b6d4;
+            --pin-glow: rgba(6, 182, 212, 0.3);
+            --choke-color: #ef4444;
+            --choke-glow: rgba(239, 68, 68, 0.3);
+            --armlock-color: #a855f7;
+            --armlock-glow: rgba(168, 85, 247, 0.3);
 
             --text: #f8fafc;
             --text-secondary: #94a3b8;
@@ -520,6 +527,9 @@
         .throw-btn.ashi::before { background: linear-gradient(135deg, var(--ashi-glow), transparent 70%); }
         .throw-btn.sutemi::before { background: linear-gradient(135deg, var(--sutemi-glow), transparent 70%); }
         .throw-btn.newaza::before { background: linear-gradient(135deg, var(--newaza-glow), transparent 70%); }
+        .throw-btn.pin::before { background: linear-gradient(135deg, var(--pin-glow), transparent 70%); }
+        .throw-btn.choke::before { background: linear-gradient(135deg, var(--choke-glow), transparent 70%); }
+        .throw-btn.armlock::before { background: linear-gradient(135deg, var(--armlock-glow), transparent 70%); }
 
         .throw-btn:hover {
             transform: translateY(-4px);
@@ -536,6 +546,9 @@
         .throw-btn.ashi:hover { box-shadow: 0 8px 30px var(--ashi-glow); }
         .throw-btn.sutemi:hover { box-shadow: 0 8px 30px var(--sutemi-glow); }
         .throw-btn.newaza:hover { box-shadow: 0 8px 30px var(--newaza-glow); }
+        .throw-btn.pin:hover { box-shadow: 0 8px 30px var(--pin-glow); }
+        .throw-btn.choke:hover { box-shadow: 0 8px 30px var(--choke-glow); }
+        .throw-btn.armlock:hover { box-shadow: 0 8px 30px var(--armlock-glow); }
 
         .throw-btn:active {
             transform: scale(0.95);
@@ -571,6 +584,9 @@
         .throw-category-dot.ashi { color: var(--ashi-color); background: var(--ashi-color); }
         .throw-category-dot.sutemi { color: var(--sutemi-color); background: var(--sutemi-color); }
         .throw-category-dot.newaza { color: var(--newaza-color); background: var(--newaza-color); }
+        .throw-category-dot.pin { color: var(--pin-color); background: var(--pin-color); }
+        .throw-category-dot.choke { color: var(--choke-color); background: var(--choke-color); }
+        .throw-category-dot.armlock { color: var(--armlock-color); background: var(--armlock-color); }
 
         .throw-name {
             font-size: 0.85rem;
@@ -1569,6 +1585,9 @@
         .legend-dot.ashi { color: var(--ashi-color); background: var(--ashi-color); }
         .legend-dot.sutemi { color: var(--sutemi-color); background: var(--sutemi-color); }
         .legend-dot.newaza { color: var(--newaza-color); background: var(--newaza-color); }
+        .legend-dot.pin { color: var(--pin-color); background: var(--pin-color); }
+        .legend-dot.choke { color: var(--choke-color); background: var(--choke-color); }
+        .legend-dot.armlock { color: var(--armlock-color); background: var(--armlock-color); }
 
         /* Quick stats row for desktop */
         .quick-stats {
@@ -1723,9 +1742,9 @@
 
                 <div id="newazaTab" class="tab-content">
                     <div class="category-legend">
-                        <div class="legend-item"><div class="legend-dot newaza"></div>Pins</div>
-                        <div class="legend-item"><div class="legend-dot newaza"></div>Chokes</div>
-                        <div class="legend-item"><div class="legend-dot newaza"></div>Armlocks</div>
+                        <div class="legend-item"><div class="legend-dot pin"></div>Pins</div>
+                        <div class="legend-item"><div class="legend-dot choke"></div>Chokes</div>
+                        <div class="legend-item"><div class="legend-dot armlock"></div>Armlocks</div>
                     </div>
                     <div class="throw-grid" id="newazaGrid"></div>
                 </div>
@@ -2043,8 +2062,8 @@
             grid.innerHTML = NEWAZA.map(t => {
                 const count = state.newaza.filter(x => x.name === t.id).length;
                 return `
-                    <button class="throw-btn ${t.category}" onclick="logNewaza('${t.id}', this)">
-                        <div class="throw-category-dot ${t.category}"></div>
+                    <button class="throw-btn ${t.subcategory}" onclick="logNewaza('${t.id}', this)">
+                        <div class="throw-category-dot ${t.subcategory}"></div>
                         <div class="throw-name">${t.name}</div>
                         <div class="throw-count">${count}</div>
                     </button>
