@@ -1,4 +1,4 @@
-const CACHE_NAME = 'randori-tracker-v1';
+const CACHE_NAME = 'randori-tracker-v2';
 const ASSETS = [
   '/judo-tracker/',
   '/judo-tracker/index.html',
