@@ -1064,6 +1064,137 @@
             font-weight: 700;
         }
 
+        /* Training heatmap */
+        .heatmap-container {
+            overflow-x: auto;
+            padding: 8px 0;
+        }
+
+        .heatmap {
+            display: flex;
+            gap: 3px;
+        }
+
+        .heatmap-week {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .heatmap-cell {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            transition: transform 0.1s ease;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.3);
+            z-index: 10;
+        }
+
+        .heatmap-cell.level-1 {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .heatmap-cell.level-2 {
+            background: rgba(99, 102, 241, 0.45);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .heatmap-cell.level-3 {
+            background: rgba(99, 102, 241, 0.65);
+            border-color: rgba(99, 102, 241, 0.7);
+        }
+
+        .heatmap-cell.level-4 {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .heatmap-cell.today {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px;
+        }
+
+        .heatmap-labels {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 6px;
+        }
+
+        .heatmap-day-label {
+            width: 14px;
+            height: 14px;
+            font-size: 0.55rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heatmap-month-labels {
+            display: flex;
+            margin-bottom: 8px;
+            padding-left: 0;
+        }
+
+        .heatmap-month-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            justify-content: flex-end;
+        }
+
+        .heatmap-legend-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .heatmap-legend-cells {
+            display: flex;
+            gap: 3px;
+        }
+
+        .heatmap-legend-cell {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .heatmap-legend-cell.level-1 {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .heatmap-legend-cell.level-2 {
+            background: rgba(99, 102, 241, 0.45);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .heatmap-legend-cell.level-3 {
+            background: rgba(99, 102, 241, 0.65);
+            border-color: rgba(99, 102, 241, 0.7);
+        }
+
+        .heatmap-legend-cell.level-4 {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
         /* Top throws list */
         .top-throws {
             display: flex;
@@ -2383,6 +2514,67 @@
             // Session history
             const recentSessions = state.sessions.slice(-5).reverse();
 
+            // Heatmap data (last 12 weeks)
+            const heatmapWeeks = 12;
+            const heatmapData = [];
+            const heatmapDailyCounts = {};
+
+            // Count throws per day for all time
+            state.throws.forEach(t => {
+                const d = new Date(t.timestamp).toDateString();
+                heatmapDailyCounts[d] = (heatmapDailyCounts[d] || 0) + 1;
+            });
+            state.newaza.forEach(n => {
+                const d = new Date(n.timestamp).toDateString();
+                heatmapDailyCounts[d] = (heatmapDailyCounts[d] || 0) + 1;
+            });
+
+            // Find the start of the first week (go back to Sunday)
+            const heatmapEnd = new Date(now);
+            const heatmapStart = new Date(now);
+            heatmapStart.setDate(heatmapStart.getDate() - (heatmapWeeks * 7) + 1);
+            // Adjust to start on Sunday
+            heatmapStart.setDate(heatmapStart.getDate() - heatmapStart.getDay());
+
+            // Build weeks
+            const monthLabels = [];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            let lastMonth = -1;
+            let currentDate = new Date(heatmapStart);
+
+            while (currentDate <= heatmapEnd) {
+                const week = [];
+                const weekStartMonth = currentDate.getMonth();
+
+                for (let day = 0; day < 7; day++) {
+                    const dateStr = currentDate.toDateString();
+                    const count = heatmapDailyCounts[dateStr] || 0;
+                    const isToday = dateStr === today;
+                    const isFuture = currentDate > now;
+
+                    // Track month labels
+                    if (currentDate.getMonth() !== lastMonth && day === 0) {
+                        monthLabels.push({ weekIndex: heatmapData.length, month: months[currentDate.getMonth()] });
+                        lastMonth = currentDate.getMonth();
+                    }
+
+                    week.push({ count, isToday, isFuture, date: new Date(currentDate) });
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                heatmapData.push(week);
+            }
+
+            // Calculate levels (0-4) based on activity
+            const allCounts = Object.values(heatmapDailyCounts).filter(c => c > 0);
+            const heatmapMax = allCounts.length > 0 ? Math.max(...allCounts) : 1;
+            const getLevel = (count) => {
+                if (count === 0) return 0;
+                if (count <= heatmapMax * 0.25) return 1;
+                if (count <= heatmapMax * 0.5) return 2;
+                if (count <= heatmapMax * 0.75) return 3;
+                return 4;
+            };
+
             return `
                 <div class="stat-section">
                     <div class="stat-section-title">This Week</div>
@@ -2396,6 +2588,39 @@
                                     <div class="chart-day ${c.isToday ? 'today' : ''}">${c.day}</div>
                                 </div>
                             `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-section">
+                    <div class="stat-section-title">Training Activity</div>
+                    <div class="stat-card wide">
+                        <div class="heatmap-container">
+                            <div class="heatmap">
+                                ${heatmapData.map((week, weekIdx) => `
+                                    <div class="heatmap-week">
+                                        ${week.map(day => {
+                                            if (day.isFuture) return `<div class="heatmap-cell" style="visibility: hidden;"></div>`;
+                                            const level = getLevel(day.count);
+                                            const levelClass = level > 0 ? `level-${level}` : '';
+                                            const todayClass = day.isToday ? 'today' : '';
+                                            const title = `${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${day.count} technique${day.count !== 1 ? 's' : ''}`;
+                                            return `<div class="heatmap-cell ${levelClass} ${todayClass}" title="${title}"></div>`;
+                                        }).join('')}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="heatmap-legend">
+                            <span class="heatmap-legend-label">Less</span>
+                            <div class="heatmap-legend-cells">
+                                <div class="heatmap-legend-cell"></div>
+                                <div class="heatmap-legend-cell level-1"></div>
+                                <div class="heatmap-legend-cell level-2"></div>
+                                <div class="heatmap-legend-cell level-3"></div>
+                                <div class="heatmap-legend-cell level-4"></div>
+                            </div>
+                            <span class="heatmap-legend-label">More</span>
                         </div>
                     </div>
                 </div>
