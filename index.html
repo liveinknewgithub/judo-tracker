@@ -1961,42 +1961,42 @@
     <script>
         // Data
         const THROWS = [
-            // Te-waza (hand techniques)
+            // Te-waza (hand techniques) - ordered by competition frequency
             { id: 'seoi-nage', name: 'Seoi-nage', category: 'te' },
             { id: 'ippon-seoi', name: 'Ippon-seoi', category: 'te' },
-            { id: 'morote-seoi', name: 'Morote-seoi', category: 'te' },
-            { id: 'tai-otoshi', name: 'Tai-otoshi', category: 'te' },
-            { id: 'kata-guruma', name: 'Kata-guruma', category: 'te' },
             { id: 'sode-tsuri', name: 'Sode-tsuri', category: 'te' },
-            // Koshi-waza (hip techniques)
-            { id: 'o-goshi', name: 'O-goshi', category: 'koshi' },
-            { id: 'uki-goshi', name: 'Uki-goshi', category: 'koshi' },
+            { id: 'tai-otoshi', name: 'Tai-otoshi', category: 'te' },
+            { id: 'morote-seoi', name: 'Morote-seoi', category: 'te' },
+            { id: 'kata-guruma', name: 'Kata-guruma', category: 'te' },
+            // Koshi-waza (hip techniques) - ordered by competition frequency
             { id: 'harai-goshi', name: 'Harai-goshi', category: 'koshi' },
             { id: 'koshi-guruma', name: 'Koshi-guruma', category: 'koshi' },
-            { id: 'tsuri-goshi', name: 'Tsuri-goshi', category: 'koshi' },
             { id: 'tsurikomi-goshi', name: 'Tsurikomi-goshi', category: 'koshi' },
             { id: 'ushiro-goshi', name: 'Ushiro-goshi', category: 'koshi' },
-            // Ashi-waza (foot/leg techniques)
+            { id: 'o-goshi', name: 'O-goshi', category: 'koshi' },
+            { id: 'uki-goshi', name: 'Uki-goshi', category: 'koshi' },
+            { id: 'tsuri-goshi', name: 'Tsuri-goshi', category: 'koshi' },
+            // Ashi-waza (foot/leg techniques) - ordered by competition frequency
+            { id: 'uchi-mata', name: 'Uchi-mata', category: 'ashi' },
             { id: 'osoto-gari', name: 'Osoto-gari', category: 'ashi' },
             { id: 'ouchi-gari', name: 'Ouchi-gari', category: 'ashi' },
             { id: 'kouchi-gari', name: 'Kouchi-gari', category: 'ashi' },
             { id: 'deashi-barai', name: 'Deashi-barai', category: 'ashi' },
             { id: 'kosoto-gari', name: 'Kosoto-gari', category: 'ashi' },
-            { id: 'uchi-mata', name: 'Uchi-mata', category: 'ashi' },
-            { id: 'okuri-ashi', name: 'Okuri-ashi', category: 'ashi' },
             { id: 'sasae', name: 'Sasae', category: 'ashi' },
+            { id: 'okuri-ashi', name: 'Okuri-ashi', category: 'ashi' },
             { id: 'hiza-guruma', name: 'Hiza-guruma', category: 'ashi' },
-            { id: 'harai-tsuri', name: 'Harai-tsuri', category: 'ashi' },
             { id: 'ashi-guruma', name: 'Ashi-guruma', category: 'ashi' },
-            // Sutemi-waza (sacrifice techniques)
-            { id: 'tomoe-nage', name: 'Tomoe-nage', category: 'sutemi' },
+            { id: 'harai-tsuri', name: 'Harai-tsuri', category: 'ashi' },
+            // Sutemi-waza (sacrifice techniques) - ordered by competition frequency
             { id: 'sumi-gaeshi', name: 'Sumi-gaeshi', category: 'sutemi' },
-            { id: 'tani-otoshi', name: 'Tani-otoshi', category: 'sutemi' },
-            { id: 'soto-makikomi', name: 'Soto-makikomi', category: 'sutemi' },
+            { id: 'tomoe-nage', name: 'Tomoe-nage', category: 'sutemi' },
             { id: 'ura-nage', name: 'Ura-nage', category: 'sutemi' },
+            { id: 'soto-makikomi', name: 'Soto-makikomi', category: 'sutemi' },
+            { id: 'tani-otoshi', name: 'Tani-otoshi', category: 'sutemi' },
             { id: 'yoko-guruma', name: 'Yoko-guruma', category: 'sutemi' },
-            { id: 'hikikomi', name: 'Hikikomi', category: 'sutemi' },
-            { id: 'uki-waza', name: 'Uki-waza', category: 'sutemi' }
+            { id: 'uki-waza', name: 'Uki-waza', category: 'sutemi' },
+            { id: 'hikikomi', name: 'Hikikomi', category: 'sutemi' }
         ];
 
         const COMBOS = [
